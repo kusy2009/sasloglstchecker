@@ -23,6 +23,10 @@ A Python-based web application for analyzing SAS log and list files based on the
 ### Setup
 
 1. Clone or download this repository
+```bash
+https://github.com/kusy2009/sasloglstchecker.git
+```
+
 2. Navigate to the project directory
 3. Install the required dependencies:
 
@@ -133,6 +137,10 @@ sas_checker/
 - Modify `config.py` to change application settings
 - Add or modify patterns in `LOG_PATTERNS` and `LST_COMPARE_PATTERNS` to adjust detection logic
 - Customize the UI by modifying the templates and CSS
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
