@@ -1,0 +1,642 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="bi bi-clipboard-data"></i> Analysis Results</h4>
+                <a href="/" class="btn btn-light btn-sm">
+                    <i class="bi bi-arrow-left"></i> Back to Upload
+                </a>
+            </div>
+            <div class="card-body">
+                <div id="loadingResults">
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    <p class="text-center mt-2">Loading results...</p>
+                </div>
+                
+                <div id="resultsContent" class="d-none">
+                    <ul class="nav nav-tabs" id="resultsTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="true">
+                                <i class="bi bi-pie-chart"></i> Summary
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs" type="button" role="tab" aria-controls="logs" aria-selected="false">
+                                <i class="bi bi-file-earmark-text"></i> Log Files
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="lsts-tab" data-bs-toggle="tab" data-bs-target="#lsts" type="button" role="tab" aria-controls="lsts" aria-selected="false">
+                                <i class="bi bi-file-earmark-ruled"></i> LST Files
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content p-3 border border-top-0 rounded-bottom" id="resultsTabContent">
+                        <!-- Summary Tab -->
+                        <div class="tab-pane fade show active" id="summary" role="tabpanel" aria-labelledby="summary-tab">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-info text-white">
+                                            <h5 class="mb-0">Log Files Summary</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <canvas id="logStatusChart"></canvas>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div id="logSummaryStats"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-info text-white">
+                                            <h5 class="mb-0">LST Files Summary</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <canvas id="lstStatusChart"></canvas>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div id="lstSummaryStats"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-header bg-info text-white">
+                                            <h5 class="mb-0">Issue Types</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <canvas id="issueTypesChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Log Files Tab -->
+                        <div class="tab-pane fade" id="logs" role="tabpanel" aria-labelledby="logs-tab">
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="logSearchInput" placeholder="Search log files...">
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover" id="logFilesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Filename</th>
+                                            <th>Status</th>
+                                            <th>Errors</th>
+                                            <th>Warnings</th>
+                                            <th>Alerts</th>
+                                            <th>Other Issues</th>
+                                            <th>Total Issues</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="logFilesTableBody">
+                                        <!-- Log files will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- LST Files Tab -->
+                        <div class="tab-pane fade" id="lsts" role="tabpanel" aria-labelledby="lsts-tab">
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="lstSearchInput" placeholder="Search lst files...">
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover" id="lstFilesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Filename</th>
+                                            <th>Status</th>
+                                            <th>Compare</th>
+                                            <th>Base Vars</th>
+                                            <th>Base Obs</th>
+                                            <th>Comp Vars</th>
+                                            <th>Comp Obs</th>
+                                            <th>Criterion</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="lstFilesTableBody">
+                                        <!-- LST files will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Log Details Modal -->
+<div class="modal fade" id="logDetailsModal" tabindex="-1" aria-labelledby="logDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logDetailsModalLabel">Log File Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="logDetailsContent">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="logIssueSearchInput" placeholder="Search issues...">
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="logIssuesTable">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Line</th>
+                                    <th>Message</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logIssuesTableBody">
+                                <!-- Log issues will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- LST Details Modal -->
+<div class="modal fade" id="lstDetailsModal" tabindex="-1" aria-labelledby="lstDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="lstDetailsModalLabel">LST File Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="lstDetailsContent">
+                    <div class="card mb-3">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">File Information</h6>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-bordered">
+                                <tbody id="lstDetailsTable">
+                                    <!-- LST details will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">Messages</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group" id="lstMessageslist">
+                                <!-- LST messages will be populated here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Global variables
+    let resultId = '{{ result_id }}';
+    let resultsData = null;
+    
+    // Initialize page when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fetch results data
+        fetchResults();
+        
+        // Set up search functionality
+        document.getElementById('logSearchInput').addEventListener('keyup', function() {
+            filterTable('logFilesTable', this.value);
+        });
+        
+        document.getElementById('lstSearchInput').addEventListener('keyup', function() {
+            filterTable('lstFilesTable', this.value);
+        });
+        
+        document.getElementById('logIssueSearchInput').addEventListener('keyup', function() {
+            filterTable('logIssuesTable', this.value);
+        });
+    });
+    
+    // Fetch results data from API
+    function fetchResults() {
+        fetch(`/api/results/${resultId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Results not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                resultsData = data;
+                displayResults();
+            })
+            .catch(error => {
+                console.error('Error fetching results:', error);
+                document.getElementById('loadingResults').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle"></i> Error loading results: ${error.message}
+                    </div>
+                `;
+            });
+    }
+    
+    // Display results data
+    function displayResults() {
+        // Hide loading indicator and show results
+        document.getElementById('loadingResults').classList.add('d-none');
+        document.getElementById('resultsContent').classList.remove('d-none');
+        
+        // Display summary charts and stats
+        displaySummaryCharts();
+        
+        // Populate log files table
+        populateLogFilesTable();
+        
+        // Populate lst files table
+        populateLstFilesTable();
+    }
+    
+    // Display summary charts and statistics
+    function displaySummaryCharts() {
+        // Log status chart
+        const logStatusCtx = document.getElementById('logStatusChart').getContext('2d');
+        const logStatusChart = new Chart(logStatusCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Clean', 'Error', 'Warning', 'Issue'],
+                datasets: [{
+                    data: [
+                        resultsData.log_summary.clean_files,
+                        resultsData.log_summary.error_files,
+                        resultsData.log_summary.warning_files,
+                        resultsData.log_summary.issue_files
+                    ],
+                    backgroundColor: ['#00FF00', '#FF0000', '#A05000', '#FF6600']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        
+        // LST status chart
+        const lstStatusCtx = document.getElementById('lstStatusChart').getContext('2d');
+        const lstStatusChart = new Chart(lstStatusCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Pass', 'Not Pass', 'No Compare', 'Error'],
+                datasets: [{
+                    data: [
+                        resultsData.lst_summary.pass_files,
+                        resultsData.lst_summary.not_pass_files,
+                        resultsData.lst_summary.no_compare_files,
+                        resultsData.lst_summary.error_files
+                    ],
+                    backgroundColor: ['#00FF00', '#FF0000', '#808080', '#FF0000']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        
+        // Issue types chart
+        const issueTypesCtx = document.getElementById('issueTypesChart').getContext('2d');
+        const issueTypesChart = new Chart(issueTypesCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Errors', 'Warnings', 'Alerts', 'Other Issues'],
+                datasets: [{
+                    label: 'Number of Issues',
+                    data: [
+                        resultsData.log_summary.total_errors,
+                        resultsData.log_summary.total_warnings,
+                        resultsData.log_summary.total_alerts,
+                        resultsData.log_summary.total_others
+                    ],
+                    backgroundColor: ['#FF0000', '#A05000', '#0000FF', '#FF6600']
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // Log summary statistics
+        document.getElementById('logSummaryStats').innerHTML = `
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Total Files
+                    <span class="badge bg-primary rounded-pill">${resultsData.log_summary.total_files}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Clean Files
+                    <span class="badge bg-success rounded-pill">${resultsData.log_summary.clean_files}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Files with Errors
+                    <span class="badge bg-danger rounded-pill">${resultsData.log_summary.error_files}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Files with Warnings
+                    <span class="badge bg-warning text-dark rounded-pill">${resultsData.log_summary.warning_files}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Total Issues
+                    <span class="badge bg-danger rounded-pill">${resultsData.log_summary.total_issues}</span>
+                </li>
+            </ul>
+        `;
+        
+        // LST summary statistics
+        document.getElementById('lstSummaryStats').innerHTML = `
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Total Files
+                    <span class="badge bg-primary rounded-pill">${resultsData.lst_summary.total_files}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Pass Files
+                    <span class="badge bg-success rounded-pill">${resultsData.lst_summary.pass_files}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Not Pass Files
+                    <span class="badge bg-danger rounded-pill">${resultsData.lst_summary.not_pass_files}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    No Compare Files
+                    <span class="badge bg-secondary rounded-pill">${resultsData.lst_summary.no_compare_files}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Error Files
+                    <span class="badge bg-danger rounded-pill">${resultsData.lst_summary.error_files}</span>
+                </li>
+            </ul>
+        `;
+    }
+    
+    // Populate log files table
+    function populateLogFilesTable() {
+        const tableBody = document.getElementById('logFilesTableBody');
+        tableBody.innerHTML = '';
+        
+        resultsData.log_results.forEach(log => {
+            const row = document.createElement('tr');
+            
+            // Set row color based on status
+            if (log.status === 'ERROR') {
+                row.classList.add('table-danger');
+            } else if (log.status === 'WARNING') {
+                row.classList.add('table-warning');
+            } else if (log.status === 'CLEAN') {
+                row.classList.add('table-success');
+            }
+            
+            row.innerHTML = `
+                <td>${log.filename}</td>
+                <td><span class="badge" style="background-color: ${log.status_color}">${log.status}</span></td>
+                <td>${log.summary.error_count}</td>
+                <td>${log.summary.warning_count}</td>
+                <td>${log.summary.alert_count}</td>
+                <td>${log.summary.other_count}</td>
+                <td>${log.summary.total_issues}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary view-log-details" data-filename="${log.filename}">
+                        <i class="bi bi-eye"></i> View
+                    </button>
+                </td>
+            `;
+            
+            tableBody.appendChild(row);
+        });
+        
+        // Add event listeners to view buttons
+        document.querySelectorAll('.view-log-details').forEach(button => {
+            button.addEventListener('click', function() {
+                const filename = this.getAttribute('data-filename');
+                showLogDetails(filename);
+            });
+        });
+    }
+    
+    // Populate lst files table
+    function populateLstFilesTable() {
+        const tableBody = document.getElementById('lstFilesTableBody');
+        tableBody.innerHTML = '';
+        
+        resultsData.lst_results.forEach(lst => {
+            const row = document.createElement('tr');
+            
+            // Set row color based on status
+            if (lst.status === 'PASS') {
+                row.classList.add('table-success');
+            } else if (lst.status === 'NOT PASS') {
+                row.classList.add('table-danger');
+            } else if (lst.status === 'NO COMPARE') {
+                row.classList.add('table-secondary');
+            } else if (lst.status === 'ERROR') {
+                row.classList.add('table-danger');
+            }
+            
+            row.innerHTML = `
+                <td>${lst.filename}</td>
+                <td><span class="badge" style="background-color: ${lst.status_color}">${lst.status}</span></td>
+                <td>${lst.has_compare ? 'Yes' : 'No'}</td>
+                <td>${lst.base_vars !== null ? lst.base_vars : 'N/A'}</td>
+                <td>${lst.base_obs !== null ? lst.base_obs : 'N/A'}</td>
+                <td>${lst.comp_vars !== null ? lst.comp_vars : 'N/A'}</td>
+                <td>${lst.comp_obs !== null ? lst.comp_obs : 'N/A'}</td>
+                <td>${lst.criterion}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary view-lst-details" data-filename="${lst.filename}">
+                        <i class="bi bi-eye"></i> View
+                    </button>
+                </td>
+            `;
+            
+            tableBody.appendChild(row);
+        });
+        
+        // Add event listeners to view buttons
+        document.querySelectorAll('.view-lst-details').forEach(button => {
+            button.addEventListener('click', function() {
+                const filename = this.getAttribute('data-filename');
+                showLstDetails(filename);
+            });
+        });
+    }
+    
+    // Show log details in modal
+    function showLogDetails(filename) {
+        // Find log result
+        const log = resultsData.log_results.find(l => l.filename === filename);
+        
+        if (!log) {
+            console.error('Log file not found:', filename);
+            return;
+        }
+        
+        // Set modal title
+        document.getElementById('logDetailsModalLabel').textContent = `Log File: ${filename}`;
+        
+        // Populate issues table
+        const tableBody = document.getElementById('logIssuesTableBody');
+        tableBody.innerHTML = '';
+        
+        log.issues.forEach(issue => {
+            const row = document.createElement('tr');
+            row.style.color = issue.color;
+            
+            row.innerHTML = `
+                <td>${issue.type}</td>
+                <td>${issue.line_number}</td>
+                <td>${issue.message}</td>
+            `;
+            
+            tableBody.appendChild(row);
+        });
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('logDetailsModal'));
+        modal.show();
+    }
+    
+    // Show lst details in modal
+    function showLstDetails(filename) {
+        // Find lst result
+        const lst = resultsData.lst_results.find(l => l.filename === filename);
+        
+        if (!lst) {
+            console.error('LST file not found:', filename);
+            return;
+        }
+        
+        // Set modal title
+        document.getElementById('lstDetailsModalLabel').textContent = `LST File: ${filename}`;
+        
+        // Populate details table
+        document.getElementById('lstDetailsTable').innerHTML = `
+            <tr>
+                <th>Status</th>
+                <td><span class="badge" style="background-color: ${lst.status_color}">${lst.status}</span></td>
+            </tr>
+            <tr>
+                <th>Has COMPARE Procedure</th>
+                <td>${lst.has_compare ? 'Yes' : 'No'}</td>
+            </tr>
+            <tr>
+                <th>Base Variables</th>
+                <td>${lst.base_vars !== null ? lst.base_vars : 'N/A'}</td>
+            </tr>
+            <tr>
+                <th>Base Observations</th>
+                <td>${lst.base_obs !== null ? lst.base_obs : 'N/A'}</td>
+            </tr>
+            <tr>
+                <th>Compare Variables</th>
+                <td>${lst.comp_vars !== null ? lst.comp_vars : 'N/A'}</td>
+            </tr>
+            <tr>
+                <th>Compare Observations</th>
+                <td>${lst.comp_obs !== null ? lst.comp_obs : 'N/A'}</td>
+            </tr>
+            <tr>
+                <th>Criterion</th>
+                <td>${lst.criterion}</td>
+            </tr>
+        `;
+        
+        // Populate messages list
+        const messagesList = document.getElementById('lstMessageslist');
+        messagesList.innerHTML = '';
+        
+        if (lst.messages.length === 0) {
+            messagesList.innerHTML = '<li class="list-group-item">No messages</li>';
+        } else {
+            lst.messages.forEach(message => {
+                const item = document.createElement('li');
+                item.className = 'list-group-item';
+                item.textContent = message;
+                messagesList.appendChild(item);
+            });
+        }
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('lstDetailsModal'));
+        modal.show();
+    }
+    
+    // Filter table rows based on search input
+    function filterTable(tableId, query) {
+        const table = document.getElementById(tableId);
+        const rows = table.getElementsByTagName('tr');
+        
+        query = query.toLowerCase();
+        
+        // Start from index 1 to skip header row
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const text = row.textContent.toLowerCase();
+            
+            if (text.indexOf(query) > -1) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    }
+</script>
+{% endblock %}

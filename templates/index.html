@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-upload"></i> Upload SAS Files</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> Upload SAS log (.log) and list (.lst) files for analysis. You can upload individual files, a zip archive, or specify a directory path containing multiple files.
+                </div>
+                
+                <ul class="nav nav-tabs" id="uploadTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="file-tab" data-bs-toggle="tab" data-bs-target="#file-upload" type="button" role="tab" aria-controls="file-upload" aria-selected="true">
+                            <i class="bi bi-file-earmark"></i> File Upload
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="directory-tab" data-bs-toggle="tab" data-bs-target="#directory-path" type="button" role="tab" aria-controls="directory-path" aria-selected="false">
+                            <i class="bi bi-folder"></i> Directory Path
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content p-3 border border-top-0 rounded-bottom" id="uploadTabContent">
+                    <!-- File Upload Tab -->
+                    <div class="tab-pane fade show active" id="file-upload" role="tabpanel" aria-labelledby="file-tab">
+                        <form id="uploadForm" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="file" class="form-label">Select File(s)</label>
+                                <input type="file" class="form-control" id="file" name="file" accept=".log,.lst,.zip" required>
+                                <div class="form-text">Accepted file types: .log, .lst, .zip</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="customKeyword" class="form-label">Custom Alert Keyword (Optional)</label>
+                                <input type="text" class="form-control" id="customKeyword" name="custom_keyword" placeholder="ALERT" value="ALERT">
+                                <div class="form-text">Specify a custom keyword to search for in log files (default: ALERT)</div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary" id="uploadButton">
+                                    <i class="bi bi-upload"></i> Upload and Process
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Directory Path Tab -->
+                    <div class="tab-pane fade" id="directory-path" role="tabpanel" aria-labelledby="directory-tab">
+                        <form id="directoryForm">
+                            <div class="mb-3">
+                                <label for="directoryPath" class="form-label">Directory Path</label>
+                                <input type="text" class="form-control" id="directoryPath" name="directory_path" placeholder="/path/to/your/files" required>
+                                <div class="form-text">Enter the full path to the directory containing your SAS log (.log) and list (.lst) files</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="directoryCustomKeyword" class="form-label">Custom Alert Keyword (Optional)</label>
+                                <input type="text" class="form-control" id="directoryCustomKeyword" name="custom_keyword" placeholder="ALERT" value="ALERT">
+                                <div class="form-text">Specify a custom keyword to search for in log files (default: ALERT)</div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary" id="directoryButton">
+                                    <i class="bi bi-folder-check"></i> Process Directory
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div id="uploadProgress" class="mt-3 d-none">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                    </div>
+                    <p class="text-center mt-2">Processing files, please wait...</p>
+                </div>
+                
+                <div id="uploadError" class="alert alert-danger mt-3 d-none">
+                    <i class="bi bi-exclamation-triangle"></i> <span id="errorMessage"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="bi bi-info-circle"></i> About SAS Log and LST Checker</h4>
+            </div>
+            <div class="card-body">
+                <p>This application helps you analyze SAS log and list files to identify issues and verify comparison results. It implements the logic from the following SAS macros:</p>
+                
+                <h5>Log File Checking</h5>
+                <p>Scans log files for various patterns including:</p>
+                <ul>
+                    <li>ERROR messages</li>
+                    <li>WARNING messages</li>
+                    <li>ALERT messages (or custom keyword)</li>
+                    <li>Uninitialized variables</li>
+                    <li>Merge statement issues</li>
+                    <li>Missing values</li>
+                    <li>And many more...</li>
+                </ul>
+                
+                <h5>LST File Checking</h5>
+                <p>Analyzes list files to verify COMPARE procedure results:</p>
+                <ul>
+                    <li>Checks if COMPARE procedure was run</li>
+                    <li>Verifies if all values are equal</li>
+                    <li>Extracts base and comparison statistics</li>
+                    <li>Identifies criterion values</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadForm = document.getElementById('uploadForm');
+        const directoryForm = document.getElementById('directoryForm');
+        const uploadButton = document.getElementById('uploadButton');
+        const directoryButton = document.getElementById('directoryButton');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const uploadError = document.getElementById('uploadError');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        // File upload form submission
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show progress and disable button
+            uploadProgress.classList.remove('d-none');
+            uploadButton.disabled = true;
+            directoryButton.disabled = true;
+            uploadError.classList.add('d-none');
+            
+            // Create FormData object
+            const formData = new FormData(uploadForm);
+            
+            // Send AJAX request
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Redirect to results page
+                    window.location.href = data.redirect;
+                } else {
+                    // Show error
+                    errorMessage.textContent = data.error || 'An error occurred during processing.';
+                    uploadError.classList.remove('d-none');
+                    uploadProgress.classList.add('d-none');
+                    uploadButton.disabled = false;
+                    directoryButton.disabled = false;
+                }
+            })
+            .catch(error => {
+                // Show error
+                errorMessage.textContent = 'An error occurred during upload: ' + error.message;
+                uploadError.classList.remove('d-none');
+                uploadProgress.classList.add('d-none');
+                uploadButton.disabled = false;
+                directoryButton.disabled = false;
+            });
+        });
+        
+        // Directory path form submission
+        directoryForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show progress and disable button
+            uploadProgress.classList.remove('d-none');
+            uploadButton.disabled = true;
+            directoryButton.disabled = true;
+            uploadError.classList.add('d-none');
+            
+            // Get form data
+            const directoryPath = document.getElementById('directoryPath').value;
+            const customKeyword = document.getElementById('directoryCustomKeyword').value;
+            
+            // Send AJAX request
+            fetch('/process_directory', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    directory_path: directoryPath,
+                    custom_keyword: customKeyword
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Redirect to results page
+                    window.location.href = data.redirect;
+                } else {
+                    // Show error
+                    errorMessage.textContent = data.error || 'An error occurred during processing.';
+                    uploadError.classList.remove('d-none');
+                    uploadProgress.classList.add('d-none');
+                    uploadButton.disabled = false;
+                    directoryButton.disabled = false;
+                }
+            })
+            .catch(error => {
+                // Show error
+                errorMessage.textContent = 'An error occurred during processing: ' + error.message;
+                uploadError.classList.remove('d-none');
+                uploadProgress.classList.add('d-none');
+                uploadButton.disabled = false;
+                directoryButton.disabled = false;
+            });
+        });
+    });
+</script>
+{% endblock %}

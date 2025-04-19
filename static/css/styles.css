@@ -1,0 +1,169 @@
+/* Custom styles for SAS Log and LST Checker */
+
+/* General styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+/* Card styles */
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    font-weight: bold;
+}
+
+/* Table styles */
+.table th {
+    background-color: #f8f9fa;
+}
+
+.table-responsive {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* Status badges */
+.badge {
+    font-size: 0.85rem;
+    padding: 0.35em 0.65em;
+}
+
+/* File upload area */
+#uploadForm {
+    padding: 20px;
+    border: 2px dashed #dee2e6;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    margin-bottom: 20px;
+}
+
+#uploadForm:hover {
+    border-color: #6c757d;
+}
+
+/* Progress bar */
+.progress {
+    height: 25px;
+}
+
+/* Charts */
+canvas {
+    max-width: 100%;
+}
+
+/* Modal styles */
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Footer */
+.footer {
+    border-top: 1px solid #dee2e6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .table {
+        font-size: 0.9rem;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.4rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Custom colors for status indicators */
+.status-clean {
+    background-color: #28a745;
+}
+
+.status-error {
+    background-color: #dc3545;
+}
+
+.status-warning {
+    background-color: #fd7e14;
+}
+
+.status-alert {
+    background-color: #007bff;
+}
+
+.status-pass {
+    background-color: #28a745;
+}
+
+.status-not-pass {
+    background-color: #dc3545;
+}
+
+.status-no-compare {
+    background-color: #6c757d;
+}
+
+/* Tab content */
+.tab-content {
+    background-color: #fff;
+}
+
+/* Search inputs */
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* List group items */
+.list-group-item {
+    border-left: none;
+    border-right: none;
+}
+
+/* Improve table hover effect */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.075);
+}
+
+/* Improve button styling */
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+/* Improve alert styling */
+.alert {
+    border-radius: 0.25rem;
+}
+
+/* Add animation for loading */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
